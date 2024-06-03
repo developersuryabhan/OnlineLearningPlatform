@@ -40,9 +40,12 @@ urlpatterns = [
     path('student_login/',views.student_login,name='student-login'),
     path('student-enroll-course/', views.StudentEnrollCourseList.as_view(),name='student-enroll-course'),
     path('fetch-enroll-status/<int:student_id>/<int:course_id>/',views.fatch_enroll_status,name='fetch-enroll-status'),
+
     path('fetch-enrolled-students/<int:course_id>/',views.enrolledStudentList.as_view(),name='fetch-enrolled-students'),
+    path('fetch-all-enrolled-students/<int:teacher_id>/',views.enrolledStudentList.as_view(),name='fetch-enrolled-students'),
+
     path('course-rating/<int:course_id>/',views.CourseRatingList.as_view(),name='course-rating'),
-     path('fetch-rating-status/<int:student_id>/<int:course_id>/', views.fetch_rating_status, name='fetch-rating-status'),
+    path('fetch-rating-status/<int:student_id>/<int:course_id>/', views.fetch_rating_status, name='fetch-rating-status'),
 
 
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

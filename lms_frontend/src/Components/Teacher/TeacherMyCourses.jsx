@@ -92,7 +92,17 @@ const handleDeleteCourse = async (courseId) => {
                                         {courseData.map((course, index) => (
                                             <tr key={course.id}>
                                                 <th>{index + 1}</th>
-                                                <th><Link to={`/all-courses/${course.id}`}  >{course.title}</Link></th>
+                                                <th><Link to={`/all-courses/${course.id}`}  >{course.title}</Link>
+                                                <hr/>
+                                                {course.course_rating &&
+                                                  <span> Rating: {course.course_rating}/5</span>
+                                                }
+                                                {!course.course_rating &&
+                                                  <span> Rating: 0/5</span>
+                                                }
+
+
+                                                </th>
                                                 <td><img src={course.featured_image} width="80" alt={course.title} className='dashboard-img' /></td>
                                                 <td>
                                                     <Link to={`/enrolled-students/${course.id}`}>{course.total_enrolled_students}</Link>

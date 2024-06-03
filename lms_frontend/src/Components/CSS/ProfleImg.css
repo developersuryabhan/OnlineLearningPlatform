@@ -1,0 +1,11 @@
+.profile-img-container {
+    text-align: right;
+    margin-bottom: 20px;
+}
+
+.profile-img-container img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 50%;
+}

@@ -48,18 +48,14 @@ const Register = () => {
                 })
             }
             console.log(studentData)
+            window.location.href = '/student-login';
         } catch (error) {
             console.error('Error submitting form:', error);
             setStudentData({ ...studentData, status: 'error' });
 
         }
     }
-    // End
-    // rederect
-    // const teacherLoginStatus = localStorage.getItem('teacherLoginStatus')
-    // if (teacherLoginStatus === 'true') {
-    //     window.location.href = '/student-dashboard';
-    // }
+
     useEffect(() => {
         document.title = 'Student Register';
     }, []);
