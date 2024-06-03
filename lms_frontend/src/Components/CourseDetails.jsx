@@ -16,6 +16,8 @@ const CourseDetails = () => {
   const [technology_listData, setTechnology_listData] = useState([]);
   const [studentLoginStatus, setStudentLoginStatus] = useState();
   const [enrollStatus, setEnrollStatus] = useState();
+  const [ratingStatus, setRatingStatus] = useState();
+  const [avgRating, setAvgRating] = useState(0);
   const { course_id } = useParams();
   const studentId = localStorage.getItem('studentId');
 
@@ -24,18 +26,22 @@ const CourseDetails = () => {
       try {
         const response = await axios.get(`${baseUrl}/course/${course_id}/`);
         const data = response.data;
-        // console.log(data)
+        console.log(data)
         setCourseData(data);
         setChaptersData(data.course_chapters);
         setTeacherData(data.teacher);
         const parsedRelatedcourseData = JSON.parse(data.related_video);
         setRelatedcourseData(parsedRelatedcourseData);
         setTechnology_listData(data.technology_list)
+        if (data.course_rating !== '' && data.course_rating != null) {
+          console.log('Fetched rating:', data.course_rating);
+          setAvgRating(parseFloat(data.course_rating));
+        }
       } catch (error) {
         console.error('Error fetching course:', error);
       }
     };
-
+    
     //Fatch enroll status
     try {
       axios.get(`${baseUrl}/fetch-enroll-status/${studentId}/${course_id}/`)
@@ -48,48 +54,103 @@ const CourseDetails = () => {
       console.error('Error :', error);
     }
 
+    // Fetch course rating status
+    try {
+      axios.get(`${baseUrl}/fetch-rating-status/${studentId}/${course_id}/`)
+        .then((response) => {
+          if (response.data.bool === true) {
+            setRatingStatus('success');
+          }
+        })
+        .catch((error) => {
+          console.error('Error fetching rating status:', error);
+        });
+    } catch (error) {
+      console.error('Error fetching rating status:', error);
+    }
+
     const studentLoginStatus = localStorage.getItem('studentLoginStatus');
     if (studentLoginStatus === 'true') {
       setStudentLoginStatus('success');
-      // window.location.href = '/student-dashboard';
     }
 
     fetchCourse();
   }, [course_id, studentId]);
 
+
   // enroll Course Studennt
   const enrollCourse = () => {
-    // console.log(course_id)
     const formData = new FormData();
     formData.append('course', course_id);
     formData.append('student', studentId);
-  
+
     try {
-      axios.post(`${baseUrl}/student-enroll-course/`,formData, {
+      axios.post(`${baseUrl}/student-enroll-course/`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       })
-      .then((response) => {
-        if (response.status === 200 || response.status === 201) {
-          Swal.fire({
-            title: 'You have successfully enrolled in this course',
-            icon: 'success',
-            toast: true,
-            timer: 10000,
-            position: 'top-right',
-            timerProgressBar: true,
-            showConfirmButton: false
-          });
-        }
-        setEnrollStatus('success')
-        console.log(response.data);
-      })
-
+        .then((response) => {
+          if (response.status === 200 || response.status === 201) {
+            Swal.fire({
+              title: 'You have successfully enrolled in this course',
+              icon: 'success',
+              toast: true,
+              timer: 10000,
+              position: 'top-right',
+              timerProgressBar: true,
+              showConfirmButton: false
+            });
+          }
+          setEnrollStatus('success')
+          console.log(response.data);
+        })
     } catch (error) {
       console.error('Error enrolling course:', error);
     }
   }
+
+  // add Course Rating
+
+  const [ratingData, setRatingData] = useState({
+    rating: '',
+    review: ''
+  });
+
+  const handleChange = (event) => {
+    setRatingData({
+      ...ratingData,
+      [event.target.name]: event.target.value
+    });
+  };
+
+  const formSubmit = async (event) => {
+    event.preventDefault();
+    const formData = new FormData();
+    formData.append('course', course_id);
+    formData.append('student', studentId);
+    formData.append('rating', ratingData.rating);
+    formData.append('review', ratingData.review);
+    try {
+      const response = await axios.post(`${baseUrl}/course-rating/${course_id}/`, formData);
+      if (response.status === 200 || response.status === 201) {
+        Swal.fire({
+          title: 'Rating has been added successfully',
+          icon: 'success',
+          toast: true,
+          timer: 10000,
+          position: 'top-right',
+          timerProgressBar: true,
+          showConfirmButton: false
+        });
+        setRatingStatus('success');
+        window.location.reload(); // load page after submit rating
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
 
   useEffect(() => {
     document.title = 'Course Details';
@@ -117,10 +178,15 @@ const CourseDetails = () => {
             <p className='fw-bold'>Total Enrolled: {courseData.total_enrolled_students} Students</p>
 
             <div className='fw-bold'>
-              Rating: 4.5/5
+              Rating: {avgRating}/5
               {enrollStatus === 'success' && studentLoginStatus === 'success' &&
                 <>
-                  <button className='btn btn-success btn-sm ms-3' data-bs-toggle="modal" data-bs-target="#ratingModal" type="button">Rating</button>
+                  {ratingStatus !== 'success' &&
+                    <button className='btn btn-success btn-sm ms-3' data-bs-toggle="modal" data-bs-target="#ratingModal" type="button">Rating</button>
+                  }
+                  {ratingStatus === 'success' &&
+                    <small className=' badge bg-info text-dark ms-2'>You have already rated this course</small>
+                  }
                   <div className="modal fade" id="ratingModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true"
                   >
                     <div className="modal-dialog  modal-lg">
@@ -133,7 +199,7 @@ const CourseDetails = () => {
                           <form>
                             <div className="mb-3">
                               <label htmlFor="rating" className="form-label">Rating</label>
-                              <select className='form-control' name='rating'>
+                              <select onClick={handleChange} className='form-control' name='rating'>
                                 <option value="1">1</option>
                                 <option value="2">2</option>
                                 <option value="3">3</option>
@@ -143,10 +209,10 @@ const CourseDetails = () => {
                             </div>
                             <div className="mb-3">
                               <label htmlFor="review" className="form-label">Review</label>
-                              <textarea name="review" className="form-control" id="" cols="2" rows="2"></textarea>
+                              <textarea onClick={handleChange} name="review" className="form-control" id="" cols="2" rows="2"></textarea>
                             </div>
                             <div className=' d-flex justify-content-center'>
-                              <button type="submit" className="btn btn-primary">Submit</button>
+                              <button onClick={formSubmit} type="submit" className="btn btn-primary">Submit</button>
                             </div>
                           </form>
                         </div>
@@ -181,12 +247,12 @@ const CourseDetails = () => {
                     <button className='btn btn-sm btn-danger ' data-bs-toggle="modal" data-bs-target="#videoModal"> <i className="bi bi-youtube"></i> </button>
                   </span>
 
-                  {/* Video Model start*/}
+                  {/* Video Model start */}
                   <div className="modal fade" id="videoModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                     <div className="modal-dialog modal-xl">
                       <div className="modal-content">
                         <div className="modal-header">
-                          <h1 className="modal-title fs-5" id="exampleModalLabel">Video 1</h1>
+                          <h1 className="modal-title fs-5" id="exampleModalLabel">{chapter.title}</h1>
                           <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div className="modal-body">
@@ -197,7 +263,8 @@ const CourseDetails = () => {
                       </div>
                     </div>
                   </div>
-                  {/* Video Model end*/}
+                  {/* Video Model end */}
+
                 </li>
               ))}
             </ul>

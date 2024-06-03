@@ -32,3 +32,9 @@
     border: 1px solid black;
  
 }
+
+
+/* login */
+#card-body{
+    background-color: rgb(180, 99, 99);
+}

@@ -8,7 +8,7 @@ const Footer = () => {
         if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
             setShowFooter(true);
         } else {
-            setShowFooter(false); 
+            setShowFooter(false);
         }
     };
 

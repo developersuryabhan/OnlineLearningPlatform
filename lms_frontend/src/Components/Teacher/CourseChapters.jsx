@@ -32,7 +32,7 @@ const CourseChapters = () => {
             icon: 'question',
             title: 'Are you sure?',
             text: 'Once deleted, you will not be able to recover this chapter!',
-                showCancelButton: true,
+            showCancelButton: true,
             confirmButtonText: 'Yes, delete it!',
             cancelButtonText: 'Cancel',
             confirmButtonColor: '#d33',
@@ -91,11 +91,11 @@ const CourseChapters = () => {
                                                 <td>{index + 1}</td>
                                                 <td><Link to={`/edit-chapter/${chapter.id}`}>{chapter.title}</Link></td>
                                                 <td className='text-center'>
+                                                    {/* Display video thumbnail or preview  */}
                                                     <video controls width="250">
-                                                        <source src={chapter.video.url} type="video/mp4" />
-                                                        <source src={chapter.video.url} type="video/webm" />
-                                                        Your browser does not support the video tag.
-                                                    </video>
+                                                    <source src={chapter.video} type="video/mp4" />
+                                                    Your browser does not support the video tag.
+                                                </video>  
                                                 </td>
                                                 <td>{chapter.remarks}</td>
                                                 <td>

@@ -44,23 +44,23 @@ function TeacherLogin() {
 
     return (
         <div className='container mt-5'>
-            <div className="row">
-                <div className="col-6 offset-3">
-                    <div className="card border-2 shadow">
-                        <h5 className='card-header text-bg-info text-center m-4'>Teacher Login</h5>
-                        <div className="card-body">
+            <div className="row justify-content-center ">
+                <div className="col-md-6 mt-5">
+                    <div className="card shadow">
+                        <div className="card-body bg-warning ">
+                            <h5 className='card-title text-center mb-4 mt-2 fw-bold'>Teacher Login</h5>
                             {error && <p className="text-danger">{error}</p>}
                             <form onSubmit={submitForm}>
-                                <div className="mb-3">
-                                    <label htmlFor="email" className="form-label">Email</label>
+                                <div className="form-group mt-3 fw-bold">
+                                    <label htmlFor="email">Email</label>
                                     <input value={email} onChange={handleChange} type="email" className="form-control" id="email" aria-describedby="email" name="email" />
                                 </div>
-                                <div className="mb-3">
-                                    <label htmlFor="password" className="form-label">Password</label>
+                                <div className="form-group mt-3 fw-bold">
+                                    <label htmlFor="password">Password</label>
                                     <input value={password} onChange={handleChange} type="password" className="form-control" id="password" name="password" />
                                 </div>
-                                <div className='d-flex justify-content-center'>
-                                    <button type="submit" className='btn btn-success'>Login</button>
+                                <div className='text-center mt-4'>
+                                    <button type="submit" className='btn btn-success btn-lg w-100'>Login</button>
                                 </div>
                             </form>
                         </div>
@@ -72,6 +72,3 @@ function TeacherLogin() {
 }
 
 export default TeacherLogin;
-
-
-

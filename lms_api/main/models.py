@@ -6,7 +6,6 @@ from django.utils.translation import gettext_lazy as _
 # Create your models here.
 class Teacher(models.Model):
     full_name = models.CharField(max_length=100)
-    detail = models.TextField(null=True)
     email = models.CharField(max_length=100)
     password = models.CharField(max_length=100)
     qualification  = models.CharField(max_length=100)
@@ -17,7 +16,7 @@ class Teacher(models.Model):
         verbose_name_plural="1. Teachers"
     def __str__(self):
         return self.full_name
-    
+
     def skill_list(self):
         skill_list = self.skills.split(',')
         return skill_list
@@ -28,8 +27,9 @@ class CourseCategory(models.Model):
 
     class Meta:
         verbose_name_plural="2. CourseCategories"
+    # detail = models.TextField(null=True)
 
-    
+
     def __str__(self):
             return self.title
 
@@ -52,7 +52,7 @@ class Course(models.Model):
 
     class Meta:
         verbose_name_plural="3. Courses"
-    
+
     def related_video(self):
         related_video= Course.objects.filter(technology__icontains=self.technology)
         return serializers.serialize('json',related_video)
@@ -64,10 +64,14 @@ class Course(models.Model):
     def total_enrolled_students(self):
         total_enrolled_students=StudentCourseErollment.objects.filter(course=self).count()
         return total_enrolled_students
-     
+
+    def course_rating(self):
+        course_rating=CourseRating.objects.filter(course=self).aggregate(avgRating=models.Avg('rating'))
+        return course_rating['avgRating']
+
     def __str__(self):
         return self.title
-    
+
 #Chapter Model
 class Chapter(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='course_chapters')
@@ -107,21 +111,17 @@ class StudentCourseErollment(models.Model):
 
     def __str__(self):
         return f"{self.course}-{self.student}"
-    
 
+#Course Rating & review
 class  CourseRating(models.Model):
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
-    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, null=True)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True)
     rating = models.PositiveBigIntegerField(default=0)
     review = models.TextField(null=True)
     review_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name_plural="7. CourseRating"
-    
+
     def __str__(self):
             return f"{self.course}-{self.student}-{self.rating}"
-    
-
-
-    

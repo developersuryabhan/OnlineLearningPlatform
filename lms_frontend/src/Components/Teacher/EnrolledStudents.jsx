@@ -9,19 +9,18 @@ const EnrolledStudents = () => {
     const [studentData, setStudentData] = useState([]);
     let { course_id } = useParams();
 
-    //fatech courses when page load
+    //fatech courses
     useEffect(() => {
         try {
             axios.get(`${baseUrl}/fetch-enrolled-students/${course_id}/`)
                 .then((response) => {
-                    // console.log("Response data:", response.data);
                     setStudentData(response.data);
                 });
         } catch (error) {
             console.log(error);
         }
     }, [course_id]);
- 
+
     useEffect(() => {
         document.title = 'Teacher | EnrolledStudents';
     }, []);
