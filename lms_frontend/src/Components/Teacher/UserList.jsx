@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+// import { useParams, Link } from 'react-router-dom'
 import axios from 'axios';
 import TeacherSidebar from './TeacherSidebar'
 
@@ -9,7 +9,7 @@ const UserList = () => {
     const [studentData, setStudentData] = useState([]);
     const teacherId = localStorage.getItem('teacherId');
 
-    //fatech courses
+    //fatech  All Enrolled student
     useEffect(() => {
         try {
             axios.get(`${baseUrl}/fetch-all-enrolled-students/${teacherId}/`)

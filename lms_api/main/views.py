@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework import generics, status,permissions
 from .serializers import  TeacherSerializer, CategorySerializer, CourseSerializer, ChapterSerializer, StudentSerializer,StudentErollCourseSerializer,CourseRatingSerializer, TeacherDashboardSerializer
 import json
+from django.db.models import Q
 from .models import Teacher, CourseCategory, Course, Chapter, Student,StudentCourseErollment,CourseRating
 
 
@@ -74,19 +75,35 @@ class CourseList(generics.ListCreateAPIView):
     def get_queryset(self):
         queryset = super().get_queryset()
 
+        # Limit the results if 'result' is in the request
         if 'result' in self.request.GET:
             limit = int(self.request.GET['result'])
             queryset = Course.objects.all().order_by('-id')[:limit]
 
+         # Filter by category if 'category' is in the request
         if 'category' in self.request.GET:
             category = self.request.GET['category']
             queryset = Course.objects.filter(technology__icontains=category)
 
+        # Filter by skill name and teacher if both are in the request
         if 'skill_name' in self.request.GET and 'teacher' in self.request.GET:
             skill_name = self.request.GET['skill_name']
             teacher = self.request.GET['teacher']
             teacher = Teacher.objects.filter(id=teacher).first()
             queryset = Course.objects.filter(technology__icontains=skill_name, teacher=teacher)
+
+   # Filter by student's interested categories if 'studentId' is in the kwargs
+        if 'studentId' in self.kwargs:
+            student_id = self.kwargs['studentId']
+            student = Student.objects.get(pk=student_id)
+            queries = [Q(technology__icontains=value) for value in student.interested_categories]
+            if queries:
+                query = queries.pop()
+                for item in queries:
+                    query |= item
+                queryset = Course.objects.filter(query)
+            else:
+                queryset = Course.objects.none()
 
         return queryset
 
@@ -118,7 +135,7 @@ class DeleteTeacherCourseDetail(APIView):
     def delete(self, request, pk, format=None):
         try:
             course = Course.objects.get(pk=pk).delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response(status=status.HTTP_204_NO_CONTENT) # Filter by student's interested categories if 'studentId' is in the kwargs
         except Course.DoesNotExist:
             raise Http404
 
@@ -213,6 +230,10 @@ class enrolledStudentList(generics.ListAPIView):
             teacher_id = self.kwargs['teacher_id']
             teacher = Teacher.objects.get(pk=teacher_id)
             return StudentCourseErollment.objects.filter(course__teacher=teacher).distinct()
+        elif 'student_id' in self.kwargs:
+            student_id = self.kwargs['student_id']
+            student = Student.objects.get(pk=student_id)
+            return StudentCourseErollment.objects.filter(student=student).distinct()
 
 
 # Course rating

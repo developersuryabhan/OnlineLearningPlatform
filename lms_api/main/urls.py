@@ -46,6 +46,9 @@ urlpatterns = [
     path('fetch-enrolled-students/<int:course_id>/',views.enrolledStudentList.as_view(),name='fetch-enrolled-students'),
     path('fetch-all-enrolled-students/<int:teacher_id>/',views.enrolledStudentList.as_view(),name='fetch-enrolled-students'),
 
+    path('fetch-enrolled-courses/<int:student_id>/',views.enrolledStudentList.as_view(),name='fetch-enrolled-courses'),
+    path('fetch_recommended_courses/<int:studentId>/',views.CourseList.as_view(),name='fetch_recommended_courses'),
+
     path('course-rating/<int:course_id>/',views.CourseRatingList.as_view(),name='course-rating'),
     path('fetch-rating-status/<int:student_id>/<int:course_id>/', views.fetch_rating_status, name='fetch-rating-status'),
 
