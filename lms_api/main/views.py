@@ -1,9 +1,10 @@
 from django.http import  JsonResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.views import APIView
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import generics, status,permissions
-from .serializers import  TeacherSerializer, CategorySerializer, CourseSerializer, ChapterSerializer, StudentSerializer,StudentErollCourseSerializer,CourseRatingSerializer
+from .serializers import  TeacherSerializer, CategorySerializer, CourseSerializer, ChapterSerializer, StudentSerializer,StudentErollCourseSerializer,CourseRatingSerializer, TeacherDashboardSerializer
 import json
 from .models import Teacher, CourseCategory, Course, Chapter, Student,StudentCourseErollment,CourseRating
 
@@ -14,10 +15,17 @@ class TeacherList(generics.ListCreateAPIView):
     serializer_class = TeacherSerializer
     # permission_classes = [permissions.IsAuthenticated]
 
+
 class TeacherDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Teacher.objects.all()
     serializer_class = TeacherSerializer
     # permission_classes = [permissions.IsAuthenticated]
+
+
+class TeacherDashboard(generics.RetrieveAPIView):
+    queryset = Teacher.objects.all()
+    serializer_class = TeacherDashboardSerializer
+
 
 # Teacher Login
 @csrf_exempt
@@ -35,9 +43,28 @@ def teacher_login(request):
     return JsonResponse({'error': 'Invalid method'}, status=400)
 
 
+# Teacher change-password/
+@api_view(['PUT'])
+def teacher_change_password(request, teacher_id):
+    if request.method == 'PUT':
+        password = request.data.get('password')
+        try:
+            teacherData = Teacher.objects.get(id=teacher_id)
+        except Teacher.DoesNotExist:
+            teacherData = None
+        if teacherData:
+            teacherData.password = password
+            teacherData.save()
+            return Response({'bool': True})
+        else:
+            return Response({'bool': False})
+
+
+#CategoryList
 class CategoryList(generics.ListCreateAPIView):
     queryset = CourseCategory.objects.all()
     serializer_class = CategorySerializer
+
 
 #Courses
 class CourseList(generics.ListCreateAPIView):
@@ -63,10 +90,12 @@ class CourseList(generics.ListCreateAPIView):
 
         return queryset
 
+
 #Courses Detail View
 class CourseDetailView(generics.RetrieveAPIView):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
+
 
 #Specific teacher Course
 class TeacherCourseList(generics.ListAPIView):
@@ -77,10 +106,12 @@ class TeacherCourseList(generics.ListAPIView):
         teacher = Teacher.objects.get(pk=teacher_id)
         return Course.objects.filter(teacher=teacher)
 
+
 #teacher Course Details
 class TeacherCourseDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
+
 
 #Delete teacher Course Details
 class DeleteTeacherCourseDetail(APIView):
@@ -91,10 +122,12 @@ class DeleteTeacherCourseDetail(APIView):
         except Course.DoesNotExist:
             raise Http404
 
+
 # Chapter Create List
 class ChapterList(generics.ListCreateAPIView):
     queryset = Chapter.objects.all()
     serializer_class = ChapterSerializer
+
 
 #Course Chapter List
 class CourseChapterList(generics.ListAPIView):
@@ -105,10 +138,12 @@ class CourseChapterList(generics.ListAPIView):
         course = Course.objects.get(pk=course_id)
         return Chapter.objects.filter(course=course)
 
+
 # ChapterDetailView
 class ChapterDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Chapter.objects.all()
     serializer_class = ChapterSerializer
+
 
 # delete chapter
 class ChapterDeleteView(APIView):
@@ -130,6 +165,7 @@ class ChapterDeleteView(APIView):
 class StudentList(generics.ListCreateAPIView):
     queryset = Student.objects.all()
     serializer_class = StudentSerializer
+
 
 # Student Login
 @csrf_exempt
@@ -177,6 +213,7 @@ class enrolledStudentList(generics.ListAPIView):
             teacher_id = self.kwargs['teacher_id']
             teacher = Teacher.objects.get(pk=teacher_id)
             return StudentCourseErollment.objects.filter(course__teacher=teacher).distinct()
+
 
 # Course rating
 class CourseRatingList(generics.ListCreateAPIView):

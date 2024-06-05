@@ -116,7 +116,7 @@ const TeacherProfileSetting = () => {
                 </aside>
                 <section className="col-md-9">
                     <div className="card">
-                        <h5 className="card-header text-center border-3 m-3 fw-bold">Profile Setting</h5>
+                        <h5 className="card-header text-center border-3 m-3 fw-bold">Teacher Profile Setting</h5>
                         <div className="card-body p-4">
                             <form onSubmit={submitForm}>
                                 <div className="row mb-3">

@@ -1,11 +1,12 @@
 from rest_framework import serializers
 from main.models import Teacher, CourseCategory, Course, Chapter, Student,StudentCourseErollment,CourseRating
 
+
 # Teacher
 class TeacherSerializer(serializers.ModelSerializer):
     class Meta:
         model = Teacher
-        fields = ["id","full_name","email","qualification","mobile_no","skills","teacher_courses","skill_list","profile_img","address"]
+        fields = ["id","full_name","email","password","qualification","mobile_no","skills","teacher_courses","skill_list","profile_img","address"]
 
     def __init__(self, *args, **kwargs):
         super(TeacherSerializer, self).__init__(*args, **kwargs)
@@ -14,11 +15,22 @@ class TeacherSerializer(serializers.ModelSerializer):
         if request and request.method == 'GET':
             self.Meta.depth=1
 
+
+# TeacherDashboard
+class TeacherDashboardSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Teacher
+        fields = ["id","total_teacher_courses","total_teacher_chapters","total_teacher_students"]
+
+
+# Category
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = CourseCategory
         fields = ["id","title","description"]
 
+
+# Chapter
 class ChapterSerializer(serializers.ModelSerializer):
     class Meta:
         model = Chapter
@@ -30,7 +42,6 @@ class ChapterSerializer(serializers.ModelSerializer):
         self.Meta.depth = 0
         if request and request.method == 'GET':
             self.Meta.depth=1
-
 
 # Course
 class CourseSerializer(serializers.ModelSerializer):
@@ -66,6 +77,7 @@ class StudentSerializer(serializers.ModelSerializer):
         fields = ["full_name", "email", "username", "password", "address", "interested_categories"]
 
 
+# StudentErollCourse
 class StudentErollCourseSerializer(serializers.ModelSerializer):
     class Meta:
         model = StudentCourseErollment
@@ -78,7 +90,7 @@ class StudentErollCourseSerializer(serializers.ModelSerializer):
         if request and request.method == 'GET':
             self.Meta.depth=2
 
-
+# CourseRating
 class CourseRatingSerializer(serializers.ModelSerializer):
     class Meta:
         model = CourseRating

@@ -7,6 +7,8 @@ urlpatterns = [
     #teacher
     path('teacher/',views.TeacherList.as_view(),name='teacher-list'),
     path('teacher/<int:pk>/',views.TeacherDetail.as_view(),name='teacher-detail'),
+    path('teacher_dashboard/<int:pk>/', views.TeacherDashboard.as_view(), name='teacher-dashboard'),
+    path('teacher_change_password/<int:teacher_id>/', views.teacher_change_password, name='teacher_change_password'),
     path('teacher_login/',views.teacher_login,name='teacher-login'),
 
     #Category

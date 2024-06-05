@@ -3,15 +3,15 @@ from django.core import serializers
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
-# Create your models here.
+# Teacher Model
 class Teacher(models.Model):
     full_name = models.CharField(max_length=100)
     email = models.CharField(max_length=100)
-    password = models.CharField(max_length=100)
+    password = models.CharField(max_length=100, blank=True,null=True)
     qualification  = models.CharField(max_length=100)
     mobile_no = models.CharField(max_length=20)
     profile_img= models.ImageField(upload_to='profile_img/',null=True)
-    skills = models.TextField() 
+    skills = models.TextField()
     address = models.TextField(null=True)
 
     class Meta:
@@ -23,6 +23,23 @@ class Teacher(models.Model):
         skill_list = self.skills.split(',')
         return skill_list
 
+    # Total teacher Course
+    def total_teacher_courses(self):
+        total_courses = Course.objects.filter(teacher=self).count()
+        return total_courses
+
+    # Total teacher chapters
+    def total_teacher_chapters(self):
+        total_chapters = Chapter.objects.filter(course__teacher=self).count()
+        return total_chapters
+
+    # Total teacher Students
+    def total_teacher_students(self):
+        total_students = StudentCourseErollment.objects.filter(course__teacher=self).count()
+        return total_students
+
+
+# CourseC ategory Model
 class CourseCategory(models.Model):
     title = models.CharField(max_length=150)
     description = models.TextField()
@@ -44,6 +61,8 @@ def validate_file_extension(value):
     if not ext.lower() in valid_extensions:
         raise ValidationError(_('File extension “%(ext)s” is not allowed. Allowed extensions are: %(valid_extensions)s'), params={'ext': ext, 'valid_extensions': ', '.join(valid_extensions)})
 
+
+#Course Model
 class Course(models.Model):
     category = models.ForeignKey(CourseCategory,on_delete=models.CASCADE)
     teacher = models.ForeignKey(Teacher,on_delete=models.CASCADE, related_name='teacher_courses')
@@ -74,6 +93,7 @@ class Course(models.Model):
     def __str__(self):
         return self.title
 
+
 #Chapter Model
 class Chapter(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='course_chapters')
@@ -88,6 +108,8 @@ class Chapter(models.Model):
     def __str__(self):
             return self.title
 
+
+#Student Model
 class Student(models.Model):
     full_name = models.CharField(max_length=100)
     email = models.CharField(max_length=100)
@@ -103,6 +125,7 @@ class Student(models.Model):
             return self.full_name
 
 
+# StudentCourse Model
 class StudentCourseErollment(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="enrolled_courses")
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name="enrolled_student")
@@ -114,7 +137,8 @@ class StudentCourseErollment(models.Model):
     def __str__(self):
         return f"{self.course}-{self.student}"
 
-#Course Rating & review
+
+#Course Rating & review Model
 class  CourseRating(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, null=True)
     student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True)

@@ -1,54 +1,37 @@
-import React, { useEffect, useState } from 'react';
-import '../CSS/Styles.css';
-import axios from 'axios';
 import TeacherSidebar from './TeacherSidebar';
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom'
+// import '../CSS/Styles.css';
+import axios from 'axios';
 import Swal from 'sweetalert2';
 
 const baseUrl = 'http://127.0.0.1:8000/api';
 
 const TeacherDashboard = () => {
-    const [courseData, setCourseData] = useState([]);
-
+    const [dashboardData, setDashboardData] = useState([]);
+    const teacherId = localStorage.getItem('teacherId');
+    
     // Fetch courses when the component mounts
     useEffect(() => {
-        const teacherId = localStorage.getItem('teacherId');
-        if (teacherId) {
-            axios.get(`${baseUrl}/teacher-courses/${teacherId}`)
-                .then(response => {
-                    setCourseData(response.data);
-                })
-                .catch(error => {
-                    console.error('Error fetching courses:', error);
-                });
-        }
-    }, []);
-
-    // Delete Course Function
-    const handleDeleteCourse = async (courseId) => {
-        try {
-            const response = await axios.delete(`${baseUrl}/delete-teacher-course-detail/${courseId}/`);
-            if (response.status === 204) {
-                // Remove the deleted course from the state
-                setCourseData(courseData.filter(course => course.id !== courseId));
-                // Display success message
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: 'Course deleted successfully!'
-                });
-            } else {
-                throw new Error('Failed to delete course');
+        const fetchDashboardData = async () => {
+            try {
+                const response = await axios.get(`${baseUrl}/teacher_dashboard/${teacherId}/`);
+                setDashboardData(response.data);
+                console.log(response.data);
+            } catch (error) {
+                console.error('Error fetching courses:', error);
             }
-        } catch (error) {
-            console.error('Error deleting course:', error);
-            // Display error message
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'Failed to delete course!'
-            });
+        };
+    
+        if (teacherId) {
+            fetchDashboardData();
         }
-    };
+    }, [teacherId]);
+    
+
+    useEffect(() => {
+        document.title = 'Teacher | Dashboard';
+    }, []);
 
     return (
         <div className="container mt-4">
@@ -58,34 +41,33 @@ const TeacherDashboard = () => {
                 </aside>
                 <section className="col-md-9">
                     <div className="card">
-                        <h5 className="card-header text-center border-3 m-3">Teacher | Dashboard</h5>
-                        <div className="card">
-                            <h5 className="card-header">My Courses</h5>
-                            <div className="card-body mt-3">
-                                <table className="table table-bordered border-2 table-hover text-center">
-                                    <thead>
-                                        <tr>
-                                            <th>S.No</th>
-                                            <th>Course Name</th>
-                                            <th>Image</th>
-                                            <th>Total Enrolled</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {courseData.map((course, index) => (
-                                            <tr key={course.id}>
-                                                <td>{index + 1}</td>
-                                                <td>{course.title}</td>
-                                                <td><img src={course.featured_image} alt={course.title} className="dashboard-img" /></td>
-                                                <td>{course.total_enrolled}</td>
-                                                <td>
-                                                    <button onClick={() => handleDeleteCourse(course.id)} className="btn btn-sm btn-danger"><i className="bi bi-trash3"></i> Delete</button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                        <h5 className="card-header text-center border-3 p-3 fw-bold bg-dark-subtle"> Dashboard</h5>
+                        {/* <h5 className="card-header">My Courses</h5> */}
+
+                        <div className="row mt-4">
+                            <div className="col-md-4">
+                                <div className="card-header-primary">
+                                    <h5 className="card-header bg-primary text-white">Total Courses</h5>
+                                    <div className="card-body">
+                                        <h3><Link to="/teacher-my-Courses">{dashboardData.total_teacher_courses}</Link></h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="col-md-4">
+                                <div className="card-header-success">
+                                    <h5 className="card-header bg-success text-white">Total Students</h5>
+                                    <div className="card-body">
+                                        <h3><Link to="/user-list">{dashboardData.total_teacher_students}</Link></h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="col-md-4">
+                                <div className="card-header-info">
+                                    <h5 className="card-header bg-info text-white">Total Chapters</h5>
+                                    <div className="card-body">
+                                        <h3><Link to="/teacher-my-Courses">{dashboardData.total_teacher_chapters}</Link></h3>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
